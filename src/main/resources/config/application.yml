@@ -1,0 +1,10 @@
+server:
+  servlet:
+     context-path: /migrationservice
+
+spring:
+  application:
+    name: Migration Service
+  profiles:
+    active: dev
+

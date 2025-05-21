@@ -1,0 +1,5 @@
+################################################################
+################ MIGRATION SERVICE PROPERTIES ##################
+################################################################
+migration:
+  modelfolder: C:\\development\\sosym-edelta-tool-demo\\repository
