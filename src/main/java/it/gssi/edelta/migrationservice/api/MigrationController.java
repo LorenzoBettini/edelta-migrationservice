@@ -38,58 +38,55 @@ public class MigrationController {
 
 	@PostMapping("/")
 	public ResponseEntity<byte[]> modelmigration(@RequestParam MultipartFile[] modelFiles) {
-		try {			
-			Path newFolder = createFolderWithInputModels(modelFiles); 
-			
+		try {
+			Path newFolder = createFolderWithInputModels(modelFiles);
+
 			PersonsModelMigrator personsModelMigrator = new PersonsModelMigrator();
 			Collection<Resource> result = personsModelMigrator.execute(newFolder.toString());
+			logger.info("Migrated models: " + result.stream().map(Resource::getURI).toList());
 
-            byte[] zipBytes = createZipFileResponse(result);
+			byte[] zipBytes = createZipFileResponse(result);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.parseMediaType("application/zip"));
-            headers.setContentDispositionFormData("attachment", "migratedmodels.zip");
-            headers.setContentLength(zipBytes.length);
-            return new ResponseEntity<>(zipBytes, headers, org.springframework.http.HttpStatus.OK);
-		} catch (IOException e) {
-			logger.error(e.getMessage());
-			throw new MigrationException(e);
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.parseMediaType("application/zip"));
+			headers.setContentDispositionFormData("attachment", "migratedmodels.zip");
+			headers.setContentLength(zipBytes.length);
+			return new ResponseEntity<>(zipBytes, headers, org.springframework.http.HttpStatus.OK);
 		} catch (Exception e) {
-			logger.error(e.getMessage());
 			throw new MigrationException(e);
 		}
 	}
-	
+
 	private Path createFolderWithInputModels(MultipartFile[] modelFiles) throws IOException {
 		Path newSubfolder = Paths.get(properties.getModelfolder(), System.currentTimeMillis() + "");
 		Path dir = Files.createDirectories(newSubfolder);
 		logger.info("folder containing input models: " + dir.toString());
 		for (int i = 0; i < modelFiles.length; i++) {
 			Files.write(Path.of(dir.toString(), modelFiles[i].getOriginalFilename()), modelFiles[i].getBytes());
-		}		
+		}
 		return dir;
 	}
-	
+
 	private byte[] createZipFileResponse(Collection<Resource> result) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ZipOutputStream zos = new ZipOutputStream(baos);
+		ZipOutputStream zos = new ZipOutputStream(baos);
 
-        for (Resource resource : result) {
-        	logger.debug("output model: " + resource.getURI().toString());
-        	String filename = resource.getURI().toFileString();
-        	Path filePath = Paths.get(filename);
-            if (Files.exists(filePath) && Files.isReadable(filePath)) {
-                ZipEntry zipEntry = new ZipEntry(resource.getURI().lastSegment());
-                zos.putNextEntry(zipEntry);
-                Files.copy(filePath, zos); 
-                zos.closeEntry();
-            } else {
-                logger.error("File not found or not readable: " + filename);
-            }
-        }
-        zos.close();
+		for (Resource resource : result) {
+			logger.debug("output model: " + resource.getURI().toString());
+			String filename = resource.getURI().toFileString();
+			Path filePath = Paths.get(filename);
+			if (Files.exists(filePath) && Files.isReadable(filePath)) {
+				ZipEntry zipEntry = new ZipEntry(resource.getURI().lastSegment());
+				zos.putNextEntry(zipEntry);
+				Files.copy(filePath, zos);
+				zos.closeEntry();
+			} else {
+				logger.error("File not found or not readable: " + filename);
+			}
+		}
+		zos.close();
 
-        return baos.toByteArray();
+		return baos.toByteArray();
 	}
 
 }
