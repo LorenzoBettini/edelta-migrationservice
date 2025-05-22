@@ -65,7 +65,7 @@ public class MigrationController {
 		Path dir = Files.createDirectories(newSubfolder);
 		logger.info("folder containing input models: " + dir.toString());
 		for (int i = 0; i < modelFiles.length; i++) {
-			Files.write(Path.of(dir.toString(), "model-" + i + ".persons"), modelFiles[i].getBytes());
+			Files.write(Path.of(dir.toString(), modelFiles[i].getOriginalFilename()), modelFiles[i].getBytes());
 		}		
 		return dir;
 	}
