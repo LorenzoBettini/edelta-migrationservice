@@ -156,20 +156,21 @@ public class MigrationControllerTest {
 		}
 		zipInputStream.close();
 
-		// Normalize whitespace for comparison
+		// Verify the model files are present in the ZIP
 		assertNotNull(extractedContent1, "My.persons not found in the ZIP file");
 		assertNotNull(extractedContent2, "My2.persons not found in the ZIP file");
 
-		// Compare the extracted content with expected output
-		assertEquals(normalizeXml(expectedOutputXml1), normalizeXml(extractedContent1));
-		assertEquals(normalizeXml(expectedOutputXml2), normalizeXml(extractedContent2));
+		// Compare the extracted content with expected output using normalized line endings
+		assertEquals(normalizeLineEndings(expectedOutputXml1), normalizeLineEndings(extractedContent1));
+		assertEquals(normalizeLineEndings(expectedOutputXml2), normalizeLineEndings(extractedContent2));
 	}
 
 	/**
-	 * Helper method to normalize XML by removing whitespace between tags for easier
-	 * comparison
+	 * Helper method to normalize line endings to ensure consistent comparison
+	 * across different platforms.
 	 */
-	private String normalizeXml(String xml) {
-		return xml.replaceAll(">\\s+<", "><").trim();
+	private String normalizeLineEndings(String text) {
+		// Normalize line endings by removing carriage returns
+		return text.replace("\r", "");
 	}
 }
