@@ -49,32 +49,64 @@ public class MigrationControllerTest {
 		properties.setModelfolder(tempDir.toString());
 
 		// Input XML for My.persons
-		inputXml1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<person:List\n" + "    xmi:version=\"2.0\"\n"
-				+ "    xmlns:xmi=\"http://www.omg.org/XMI\"\n" + "    xmlns:person=\"http://edelta/PersonList/v1\">\n"
-				+ "  <members firstname=\"John\"\n" + "      lastname=\"Doe\"/>\n" + "  <members firstname=\"Jane\"\n"
-				+ "      lastname=\"Doe\"\n" + "      gender=\"FEMALE\"/>\n" + "</person:List>";
+		inputXml1 = """
+				<?xml version="1.0" encoding="UTF-8"?>
+				<person:List
+				    xmi:version="2.0"
+				    xmlns:xmi="http://www.omg.org/XMI"
+				    xmlns:person="http://edelta/PersonList/v1">
+				  <members firstname="John"
+				      lastname="Doe"/>
+				  <members firstname="Jane"
+				      lastname="Doe"
+				      gender="FEMALE"/>
+				</person:List>
+				""";
 
 		// Input XML for My2.persons
-		inputXml2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<person:List\n" + "    xmi:version=\"2.0\"\n"
-				+ "    xmlns:xmi=\"http://www.omg.org/XMI\"\n" + "    xmlns:person=\"http://edelta/PersonList/v1\">\n"
-				+ "  <members firstname=\"John\"\n" + "      lastname=\"Doe\"/>\n" + "  <members firstname=\"Jane\"\n"
-				+ "      lastname=\"Doe\"\n" + "      gender=\"FEMALE\"/>\n" + "</person:List>";
+		inputXml2 = """
+				<?xml version="1.0" encoding="UTF-8"?>
+				<person:List
+				    xmi:version="2.0"
+				    xmlns:xmi="http://www.omg.org/XMI"
+				    xmlns:person="http://edelta/PersonList/v1">
+				  <members firstname="John"
+				      lastname="Doe"/>
+				  <members firstname="Jane"
+				      lastname="Doe"
+				      gender="FEMALE"/>
+				</person:List>
+				""";
 
 		// Expected output XML for My.persons
-		expectedOutputXml1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<person:List\n"
-				+ "    xmi:version=\"2.0\"\n" + "    xmlns:xmi=\"http://www.omg.org/XMI\"\n"
-				+ "    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-				+ "    xmlns:person=\"http://edelta/PersonList/v4\">\n" + "  <members xsi:type=\"person:Male\"\n"
-				+ "      name=\"John Doe\"/>\n" + "  <members xsi:type=\"person:Female\"\n"
-				+ "      name=\"Jane Doe\"/>\n" + "</person:List>";
+		expectedOutputXml1 = """
+				<?xml version="1.0" encoding="UTF-8"?>
+				<person:List
+				    xmi:version="2.0"
+				    xmlns:xmi="http://www.omg.org/XMI"
+				    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				    xmlns:person="http://edelta/PersonList/v4">
+				  <members xsi:type="person:Male"
+				      name="John Doe"/>
+				  <members xsi:type="person:Female"
+				      name="Jane Doe"/>
+				</person:List>
+				""";
 
 		// Expected output XML for My2.persons
-		expectedOutputXml2 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<person:List\n"
-				+ "    xmi:version=\"2.0\"\n" + "    xmlns:xmi=\"http://www.omg.org/XMI\"\n"
-				+ "    xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-				+ "    xmlns:person=\"http://edelta/PersonList/v4\">\n" + "  <members xsi:type=\"person:Male\"\n"
-				+ "      name=\"John Doe\"/>\n" + "  <members xsi:type=\"person:Female\"\n"
-				+ "      name=\"Jane Doe\"/>\n" + "</person:List>";
+		expectedOutputXml2 = """
+				<?xml version="1.0" encoding="UTF-8"?>
+				<person:List
+				    xmi:version="2.0"
+				    xmlns:xmi="http://www.omg.org/XMI"
+				    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				    xmlns:person="http://edelta/PersonList/v4">
+				  <members xsi:type="person:Male"
+				      name="John Doe"/>
+				  <members xsi:type="person:Female"
+				      name="Jane Doe"/>
+				</person:List>
+				""";
 	}
 
 	@Test
