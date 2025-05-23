@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -56,12 +56,7 @@
 			Person list example dependencies
 		-->
 		<dependency>
-			<groupId>edelta.example.migration.personlist</groupId>
-			<artifactId>edelta.example.migration.personlist</artifactId>
-			<version>1.0.0-SNAPSHOT</version>			
-		</dependency>
-		<dependency>
-			<groupId>edelta.example.migration.personlist</groupId>
+			<groupId>io.github.lorenzobettini.edelta.examples</groupId>
 			<artifactId>edelta.example.migration.personlist.migrator</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
@@ -77,4 +72,18 @@
 		<finalName>edelta-migrationservice</finalName>
 	</build>
 
+	<repositories>
+		<repository>
+			<id>sonatype-snapshots</id>
+			<name>Sonatype Snapshots</name>
+			<url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>daily</updatePolicy>
+			</snapshots>
+		</repository>
+	</repositories>
 </project>
