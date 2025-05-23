@@ -12,19 +12,10 @@ git clone https://github.com/gssi/edelta-migrationservice.git
 cd edelta-migrationservice
 ```
 
-### Build from the Command Line
-Before building the source code, please download the person migration example from the following GitHub repository [https://github.com/LorenzoBettini/edelta-example-migration-personlist/tree/ci](https://github.com/LorenzoBettini/edelta-example-migration-personlist/tree/ci)
-
-Then, run the following Maven command:
-
-```
-cd edelta-example-migration-personlist-ci
-mvn clean install
-```
-
+### Build and run from the Command Line
 Modify the `migration:modelfolder` property within the `src/main/resources/config/application-dev.yml`. The property is used to define the folder where the REST service stores the input models to be migrated and migrated ones.
 
-To compile, test, and build all jars, distribution zips, and docs use:
+To compile, test, build the jar, and then run the generated jar use:
 
 ```
 cd edelta-migrationservice
