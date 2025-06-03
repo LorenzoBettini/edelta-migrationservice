@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<books:BookDatabase
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:books="http://edelta/Books/v4">
+  <books title="first book">
+    <libraryBookItems
+        href="MyLibrary1.library#//@bookItems.0"/>
+  </books>
+  <books title="second book">
+    <libraryBookItems
+        href="MyLibrary2.library#//@bookItems.0"/>
+  </books>
+</books:BookDatabase>

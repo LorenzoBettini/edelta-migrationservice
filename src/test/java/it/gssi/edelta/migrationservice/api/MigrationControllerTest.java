@@ -10,7 +10,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -103,6 +105,68 @@ public class MigrationControllerTest {
 		assertEquals(normalizeLineEndings(expectedOutputXml2), normalizeLineEndings(extractedContents.get(file2Name)));
 	}
 
+	@Test
+	public void testLibraryMigration() throws Exception {
+		// File names for input and output
+		String[] fileNames = {
+			"MyBookDatabase1.books",
+			"MyBookDatabase2.books",
+			"MyLibrary1.library",
+			"MyLibrary2.library"
+		};
+		
+		// Maps for input and expected content
+		Map<String, String> inputFiles = new HashMap<>();
+		Map<String, String> expectedOutputFiles = new HashMap<>();
+		
+		// Load input files and expected output files
+		for (String fileName : fileNames) {
+			inputFiles.put(fileName, loadResource("input-models/library/" + fileName));
+			expectedOutputFiles.put(fileName, loadResource("expectations/library/" + fileName));
+		}
+		
+		// Create mock multipart files
+		List<MockMultipartFile> mockFiles = new ArrayList<>();
+		for (String fileName : fileNames) {
+			mockFiles.add(new MockMultipartFile(
+				"modelFiles", 
+				fileName, 
+				MediaType.TEXT_XML_VALUE,
+				inputFiles.get(fileName).getBytes(StandardCharsets.UTF_8)
+			));
+		}
+		
+		// Perform the request with all files
+		MvcResult result = mockMvc.perform(multipart("/api/v1/migrationservice/")
+				.file(mockFiles.get(0))
+				.file(mockFiles.get(1))
+				.file(mockFiles.get(2))
+				.file(mockFiles.get(3)))
+				.andExpect(status().isOk()).andReturn();
+
+		// Get the response as byte array
+		byte[] responseBytes = result.getResponse().getContentAsByteArray();
+
+		// Verify the response
+		assertNotNull(responseBytes);
+
+		// Extract and verify the contents of the zip file
+		Map<String, String> extractedContents = extractZipContents(responseBytes);
+		
+		// Verify each expected file
+		for (String fileName : fileNames) {
+			// Verify the file is present in the ZIP
+			assertNotNull(extractedContents.get(fileName), fileName + " not found in the ZIP file");
+			
+			// Compare the extracted content with expected output using normalized line endings
+			assertEquals(
+				normalizeLineEndings(expectedOutputFiles.get(fileName)), 
+				normalizeLineEndings(extractedContents.get(fileName)),
+				"Content mismatch for file: " + fileName
+			);
+		}
+	}
+	
 	/**
 	 * Helper method to normalize line endings to ensure consistent comparison
 	 * across different platforms.
@@ -140,5 +204,17 @@ public class MigrationControllerTest {
 		}
 		
 		return extractedContents;
+	}
+	
+	/**
+	 * Helper method to load a resource file as a string.
+	 * 
+	 * @param resourcePath The path to the resource
+	 * @return The content of the resource as a string
+	 * @throws IOException If an I/O error occurs
+	 */
+	private String loadResource(String resourcePath) throws IOException {
+		ClassPathResource resource = new ClassPathResource(resourcePath);
+		return new String(StreamUtils.copyToByteArray(resource.getInputStream()), StandardCharsets.UTF_8);
 	}
 }
