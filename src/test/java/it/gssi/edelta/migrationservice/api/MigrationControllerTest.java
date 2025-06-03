@@ -50,7 +50,10 @@ public class MigrationControllerTest {
 	void setUp() throws IOException {
 		// Setup the model folder for tests
 		properties.setModelfolder(tempDir.toString());
+	}
 
+	@Test
+	public void testPersonlistMigration() throws Exception {
 		// Load input XML files from resources
 		ClassPathResource inputResource1 = new ClassPathResource("input-models/personlist/My.persons");
 		inputXml1 = new String(StreamUtils.copyToByteArray(inputResource1.getInputStream()), StandardCharsets.UTF_8);
@@ -64,10 +67,7 @@ public class MigrationControllerTest {
 		
 		ClassPathResource expectedResource2 = new ClassPathResource("expectations/personlist/My2.persons");
 		expectedOutputXml2 = new String(StreamUtils.copyToByteArray(expectedResource2.getInputStream()), StandardCharsets.UTF_8);
-	}
 
-	@Test
-	public void testModelMigration() throws Exception {
 		// Create mock multipart files
 		MockMultipartFile file1 = new MockMultipartFile("modelFiles", "My.persons", MediaType.TEXT_XML_VALUE,
 				inputXml1.getBytes(StandardCharsets.UTF_8));
