@@ -10,6 +10,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -86,40 +88,19 @@ public class MigrationControllerTest {
 		assertNotNull(responseBytes);
 
 		// Extract and verify the contents of the zip file
-		ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(responseBytes));
-		ZipEntry entry;
-
-		// Maps to store the extracted content
-		String extractedContent1 = null;
-		String extractedContent2 = null;
-
-		while ((entry = zipInputStream.getNextEntry()) != null) {
-			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-			byte[] buffer = new byte[1024];
-			int len;
-			while ((len = zipInputStream.read(buffer)) > 0) {
-				outputStream.write(buffer, 0, len);
-			}
-
-			String content = outputStream.toString(StandardCharsets.UTF_8.name());
-
-			if (entry.getName().equals("My.persons")) {
-				extractedContent1 = content;
-			} else if (entry.getName().equals("My2.persons")) {
-				extractedContent2 = content;
-			}
-
-			zipInputStream.closeEntry();
-		}
-		zipInputStream.close();
+		Map<String, String> extractedContents = extractZipContents(responseBytes);
+		
+		// Expected file names
+		String file1Name = "My.persons";
+		String file2Name = "My2.persons";
 
 		// Verify the model files are present in the ZIP
-		assertNotNull(extractedContent1, "My.persons not found in the ZIP file");
-		assertNotNull(extractedContent2, "My2.persons not found in the ZIP file");
+		assertNotNull(extractedContents.get(file1Name), file1Name + " not found in the ZIP file");
+		assertNotNull(extractedContents.get(file2Name), file2Name + " not found in the ZIP file");
 
 		// Compare the extracted content with expected output using normalized line endings
-		assertEquals(normalizeLineEndings(expectedOutputXml1), normalizeLineEndings(extractedContent1));
-		assertEquals(normalizeLineEndings(expectedOutputXml2), normalizeLineEndings(extractedContent2));
+		assertEquals(normalizeLineEndings(expectedOutputXml1), normalizeLineEndings(extractedContents.get(file1Name)));
+		assertEquals(normalizeLineEndings(expectedOutputXml2), normalizeLineEndings(extractedContents.get(file2Name)));
 	}
 
 	/**
@@ -129,5 +110,35 @@ public class MigrationControllerTest {
 	private String normalizeLineEndings(String text) {
 		// Normalize line endings by removing carriage returns
 		return text.replace("\r", "");
+	}
+	
+	/**
+	 * Helper method to extract the contents of files from a ZIP byte array.
+	 * 
+	 * @param zipBytes The ZIP file as a byte array
+	 * @return A map where keys are filenames and values are file contents as strings
+	 * @throws IOException If an I/O error occurs
+	 */
+	private Map<String, String> extractZipContents(byte[] zipBytes) throws IOException {
+		Map<String, String> extractedContents = new HashMap<>();
+		
+		try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(zipBytes))) {
+			ZipEntry entry;
+			while ((entry = zipInputStream.getNextEntry()) != null) {
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+				byte[] buffer = new byte[1024];
+				int len;
+				while ((len = zipInputStream.read(buffer)) > 0) {
+					outputStream.write(buffer, 0, len);
+				}
+				
+				String content = outputStream.toString(StandardCharsets.UTF_8.name());
+				extractedContents.put(entry.getName(), content);
+				
+				zipInputStream.closeEntry();
+			}
+		}
+		
+		return extractedContents;
 	}
 }
