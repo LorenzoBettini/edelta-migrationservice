@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.zip.ZipEntry;
@@ -18,10 +19,12 @@ import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.util.StreamUtils;
 
 import it.gssi.edelta.migrationservice.configuration.MigrationConfigProperties;
 
@@ -44,69 +47,23 @@ public class MigrationControllerTest {
 	private String expectedOutputXml2;
 
 	@BeforeEach
-	void setUp() {
+	void setUp() throws IOException {
 		// Setup the model folder for tests
 		properties.setModelfolder(tempDir.toString());
 
-		// Input XML for My.persons
-		inputXml1 = """
-				<?xml version="1.0" encoding="UTF-8"?>
-				<person:List
-				    xmi:version="2.0"
-				    xmlns:xmi="http://www.omg.org/XMI"
-				    xmlns:person="http://edelta/PersonList/v1">
-				  <members firstname="John"
-				      lastname="Doe"/>
-				  <members firstname="Jane"
-				      lastname="Doe"
-				      gender="FEMALE"/>
-				</person:List>
-				""";
-
-		// Input XML for My2.persons
-		inputXml2 = """
-				<?xml version="1.0" encoding="UTF-8"?>
-				<person:List
-				    xmi:version="2.0"
-				    xmlns:xmi="http://www.omg.org/XMI"
-				    xmlns:person="http://edelta/PersonList/v1">
-				  <members firstname="John"
-				      lastname="Doe"/>
-				  <members firstname="Jane"
-				      lastname="Doe"
-				      gender="FEMALE"/>
-				</person:List>
-				""";
-
-		// Expected output XML for My.persons
-		expectedOutputXml1 = """
-				<?xml version="1.0" encoding="UTF-8"?>
-				<person:List
-				    xmi:version="2.0"
-				    xmlns:xmi="http://www.omg.org/XMI"
-				    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-				    xmlns:person="http://edelta/PersonList/v4">
-				  <members xsi:type="person:Male"
-				      name="John Doe"/>
-				  <members xsi:type="person:Female"
-				      name="Jane Doe"/>
-				</person:List>
-				""";
-
-		// Expected output XML for My2.persons
-		expectedOutputXml2 = """
-				<?xml version="1.0" encoding="UTF-8"?>
-				<person:List
-				    xmi:version="2.0"
-				    xmlns:xmi="http://www.omg.org/XMI"
-				    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-				    xmlns:person="http://edelta/PersonList/v4">
-				  <members xsi:type="person:Male"
-				      name="John Doe"/>
-				  <members xsi:type="person:Female"
-				      name="Jane Doe"/>
-				</person:List>
-				""";
+		// Load input XML files from resources
+		ClassPathResource inputResource1 = new ClassPathResource("input-models/personlist/My.persons");
+		inputXml1 = new String(StreamUtils.copyToByteArray(inputResource1.getInputStream()), StandardCharsets.UTF_8);
+		
+		ClassPathResource inputResource2 = new ClassPathResource("input-models/personlist/My2.persons");
+		inputXml2 = new String(StreamUtils.copyToByteArray(inputResource2.getInputStream()), StandardCharsets.UTF_8);
+		
+		// Load expected output XML files from resources
+		ClassPathResource expectedResource1 = new ClassPathResource("expectations/personlist/My.persons");
+		expectedOutputXml1 = new String(StreamUtils.copyToByteArray(expectedResource1.getInputStream()), StandardCharsets.UTF_8);
+		
+		ClassPathResource expectedResource2 = new ClassPathResource("expectations/personlist/My2.persons");
+		expectedOutputXml2 = new String(StreamUtils.copyToByteArray(expectedResource2.getInputStream()), StandardCharsets.UTF_8);
 	}
 
 	@Test
