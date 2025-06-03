@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -155,6 +156,90 @@ public class MigrationControllerTest {
 		
 		// Verify each expected file
 		for (String fileName : fileNames) {
+			// Verify the file is present in the ZIP
+			assertNotNull(extractedContents.get(fileName), fileName + " not found in the ZIP file");
+			
+			// Compare the extracted content with expected output using normalized line endings
+			assertEquals(
+				normalizeLineEndings(expectedOutputFiles.get(fileName)), 
+				normalizeLineEndings(extractedContents.get(fileName)),
+				"Content mismatch for file: " + fileName
+			);
+		}
+	}
+	
+	@Test
+	public void testCombinedMigration() throws Exception {
+		// File names for input and output - combining both personlist and library files
+		String[] personlistFiles = {"My.persons", "My2.persons"};
+		String[] libraryFiles = {
+			"MyBookDatabase1.books",
+			"MyBookDatabase2.books",
+			"MyLibrary1.library",
+			"MyLibrary2.library"
+		};
+		
+		// Load all input files and their expected outputs
+		Map<String, String> inputFiles = new HashMap<>();
+		Map<String, String> expectedOutputFiles = new HashMap<>();
+		
+		// Load personlist files
+		for (String fileName : personlistFiles) {
+			inputFiles.put(fileName, loadResource("input-models/personlist/" + fileName));
+			expectedOutputFiles.put(fileName, loadResource("expectations/personlist/" + fileName));
+		}
+		
+		// Load library files
+		for (String fileName : libraryFiles) {
+			inputFiles.put(fileName, loadResource("input-models/library/" + fileName));
+			expectedOutputFiles.put(fileName, loadResource("expectations/library/" + fileName));
+		}
+		
+		// Create mock multipart files for all models
+		List<MockMultipartFile> mockFiles = new ArrayList<>();
+		for (Map.Entry<String, String> entry : inputFiles.entrySet()) {
+			mockFiles.add(new MockMultipartFile(
+				"modelFiles", 
+				entry.getKey(), 
+				MediaType.TEXT_XML_VALUE,
+				entry.getValue().getBytes(StandardCharsets.UTF_8)
+			));
+		}
+		
+		// Build the multipart request using method chaining
+		var requestBuilder = multipart("/api/v1/migrationservice/");
+		
+		// We need to explicitly add each file
+		for (int i = 0; i < mockFiles.size(); i++) {
+			if (i == 0) {
+				// First file is added directly 
+				requestBuilder = requestBuilder.file(mockFiles.get(0));
+			} else {
+				// Subsequent files are added using method chaining
+				requestBuilder = requestBuilder.file(mockFiles.get(i));
+			}
+		}
+		
+		// Perform the request with all files
+		MvcResult result = mockMvc.perform(requestBuilder)
+				.andExpect(status().isOk()).andReturn();
+
+		// Get the response as byte array
+		byte[] responseBytes = result.getResponse().getContentAsByteArray();
+
+		// Verify the response
+		assertNotNull(responseBytes);
+
+		// Extract and verify the contents of the zip file
+		Map<String, String> extractedContents = extractZipContents(responseBytes);
+		
+		// Combine all filenames for verification
+		List<String> allFileNames = new ArrayList<>();
+		allFileNames.addAll(Arrays.asList(personlistFiles));
+		allFileNames.addAll(Arrays.asList(libraryFiles));
+		
+		// Verify each expected file
+		for (String fileName : allFileNames) {
 			// Verify the file is present in the ZIP
 			assertNotNull(extractedContents.get(fileName), fileName + " not found in the ZIP file");
 			
