@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import edelta.example.migration.library.migrator.LibraryModelMigrator;
 import edelta.example.migration.personlist.migrator.PersonsModelMigrator;
 import it.gssi.edelta.migrationservice.configuration.MigrationConfigProperties;
 
@@ -40,9 +42,16 @@ public class MigrationController {
 	public ResponseEntity<byte[]> modelmigration(@RequestParam MultipartFile[] modelFiles) {
 		try {
 			Path newFolder = createFolderWithInputModels(modelFiles);
-
+			Collection<Resource> result = new ArrayList<>();
+			// first try with the PersonsModelMigrator
+			logger.info("Starting migration with PersonsModelMigrator on folder: " + newFolder.toString());
 			PersonsModelMigrator personsModelMigrator = new PersonsModelMigrator();
-			Collection<Resource> result = personsModelMigrator.execute(newFolder.toString());
+			result.addAll(personsModelMigrator.execute(newFolder.toString()));
+			// then try with the LibraryModelMigrator
+			logger.info("Starting migration with LibraryModelMigrator on folder: " + newFolder.toString());
+			LibraryModelMigrator libraryModelMigrator = new LibraryModelMigrator();
+			result.addAll(libraryModelMigrator.execute(newFolder.toString()));
+
 			logger.info("Migrated models: " + result.stream().map(Resource::getURI).toList());
 
 			byte[] zipBytes = createZipFileResponse(result);

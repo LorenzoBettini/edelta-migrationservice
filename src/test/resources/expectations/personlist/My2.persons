@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<person:List
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:person="http://edelta/PersonList/v4">
+  <members xsi:type="person:Male"
+      name="John Doe"/>
+  <members xsi:type="person:Female"
+      name="Jane Doe"/>
+</person:List>
