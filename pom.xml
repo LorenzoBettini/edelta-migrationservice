@@ -13,7 +13,7 @@
 	<artifactId>migrationservice</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<name>migrationservice</name>
-	<description>A REST service to migrate models using edelta framework</description>
+	<description>A REST service to migrate models using the Edelta framework</description>
 	<url />
 	<licenses>
 		<license />
@@ -58,7 +58,7 @@
 		<dependency>
 			<groupId>io.github.lorenzobettini.edelta.examples</groupId>
 			<artifactId>edelta.example.migration.personlist.migrator</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
 		<!--
 			Library example dependencies
@@ -66,7 +66,7 @@
 		<dependency>
 			<groupId>io.github.lorenzobettini.edelta.examples</groupId>
 			<artifactId>edelta.example.migration.library.migrator</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
 	</dependencies>
 
@@ -80,6 +80,8 @@
 		<finalName>edelta-migrationservice</finalName>
 	</build>
 
+	<!-- enable it for using snapshots -->
+	<!--
 	<repositories>
 		<repository>
 			<name>Central Portal Snapshots</name>
@@ -93,4 +95,5 @@
 			</snapshots>
 		</repository>
 	</repositories>
+	-->
 </project>
