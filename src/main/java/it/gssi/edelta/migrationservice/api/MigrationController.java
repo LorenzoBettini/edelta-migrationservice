@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.FileSystemUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,8 +41,9 @@ public class MigrationController {
 
 	@PostMapping("/")
 	public ResponseEntity<byte[]> modelmigration(@RequestParam MultipartFile[] modelFiles) {
+		Path newFolder = null;
 		try {
-			Path newFolder = createFolderWithInputModels(modelFiles);
+			newFolder = createFolderWithInputModels(modelFiles);
 			Collection<Resource> result = new ArrayList<>();
 			// first try with the PersonsModelMigrator
 			logger.info("Starting migration with PersonsModelMigrator on folder: " + newFolder.toString());
@@ -63,15 +65,22 @@ public class MigrationController {
 			return new ResponseEntity<>(zipBytes, headers, org.springframework.http.HttpStatus.OK);
 		} catch (Exception e) {
 			throw new MigrationException(e);
+		} finally {
+			// clean up temporary folder
+			if (newFolder != null && Files.exists(newFolder)) {
+				try {
+					FileSystemUtils.deleteRecursively(newFolder);
+					logger.info("deleted temporary directory: " + newFolder.toString());
+				} catch (IOException e) {
+					throw new MigrationException(e);
+				}
+			}
 		}
 	}
 
 	private Path createFolderWithInputModels(MultipartFile[] modelFiles) throws IOException {
 		Path base = Path.of(properties.getModelfolder()); 
 		Path dir = Files.createTempDirectory(base, "inputmodels-");
-		
-		//Path newSubfolder = Paths.get(properties.getModelfolder(), System.currentTimeMillis() + "");
-		//Path dir = Files.createDirectories(newSubfolder);
 		logger.info("folder containing input models: " + dir.toString());
 		for (int i = 0; i < modelFiles.length; i++) {
 			Files.write(Path.of(dir.toString(), modelFiles[i].getOriginalFilename()), modelFiles[i].getBytes());
