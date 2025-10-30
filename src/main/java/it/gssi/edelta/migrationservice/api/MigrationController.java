@@ -67,8 +67,11 @@ public class MigrationController {
 	}
 
 	private Path createFolderWithInputModels(MultipartFile[] modelFiles) throws IOException {
-		Path newSubfolder = Paths.get(properties.getModelfolder(), System.currentTimeMillis() + "");
-		Path dir = Files.createDirectories(newSubfolder);
+		Path base = Path.of(properties.getModelfolder()); 
+		Path dir = Files.createTempDirectory(base, "inputmodels-");
+		
+		//Path newSubfolder = Paths.get(properties.getModelfolder(), System.currentTimeMillis() + "");
+		//Path dir = Files.createDirectories(newSubfolder);
 		logger.info("folder containing input models: " + dir.toString());
 		for (int i = 0; i < modelFiles.length; i++) {
 			Files.write(Path.of(dir.toString(), modelFiles[i].getOriginalFilename()), modelFiles[i].getBytes());
